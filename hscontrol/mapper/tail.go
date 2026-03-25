@@ -124,6 +124,16 @@ func tailNode(
 		tNode.CapMap[tailcfg.NodeAttrRandomizeClientPort] = []tailcfg.RawMessage{}
 	}
 
+	// Add NodeAttrSuggestExitNode to exit nodes so that tailscale clients can
+	// use --exit-node=auto:any. The tailscaled client locally runs
+	// suggestExitNode() which scans peers for this capability in their CapMap.
+	for _, route := range node.Routes {
+		if route.Enabled && route.IsExitRoute() {
+			tNode.CapMap[tailcfg.NodeAttrSuggestExitNode] = []tailcfg.RawMessage{}
+			break
+		}
+	}
+
 	if node.IsOnline == nil || !*node.IsOnline {
 		// LastSeen is only set when node is
 		// not connected to the control server.
